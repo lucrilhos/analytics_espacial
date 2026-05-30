@@ -3,12 +3,10 @@
     "name": "Monitoramento Pluto",
     "slug": "space-predictive-analytics",
     "version": "1.0.0",
-    "sdkVersion": "54.0.0",
+    "sdkVersion": "52.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "backgroundColor": "#0a0e1a"
-    },
+    "splash": { "backgroundColor": "#0a0e1a" },
     "assetBundlePatterns": ["**/*"],
     "ios": { "supportsTablet": true },
     "android": { "adaptiveIcon": { "backgroundColor": "#0a0e1a" } },

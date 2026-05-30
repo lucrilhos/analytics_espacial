@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import Svg, { Polyline, Line, Text as SvgText, Circle } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useMissao } from '../../context/MissaoContext';
 import { useDadosSensores } from '../../hooks/useDadosSensores';
@@ -9,7 +9,6 @@ import BarraStatus from '../../components/BarraStatus';
 
 const LARGURA = Dimensions.get('window').width;
 
-// Sensores disponíveis para seleção no gráfico
 const SENSORES = [
   { key: 'temperatura', label: 'Temperatura', unidade: '°C', icone: 'thermometer-outline' },
   { key: 'energia', label: 'Energia', unidade: '%', icone: 'battery-charging-outline' },
@@ -17,21 +16,74 @@ const SENSORES = [
   { key: 'estabilidade', label: 'Estabilidade', unidade: '%', icone: 'git-branch-outline' },
 ];
 
+function GraficoLinha({ dados, cor, largura = LARGURA - 48, altura = 180 }) {
+  if (!dados || dados.length < 2) return null;
+
+  const padH = 32;
+  const padV = 16;
+  const w = largura - padH * 2;
+  const h = altura - padV * 2;
+
+  const min = Math.min(...dados);
+  const max = Math.max(...dados) || 1;
+  const range = max - min || 1;
+
+  const pontos = dados.map((v, i) => {
+    const x = padH + (i / (dados.length - 1)) * w;
+    const y = padV + h - ((v - min) / range) * h;
+    return `${x},${y}`;
+  });
+
+  const pontosArr = dados.map((v, i) => ({
+    x: padH + (i / (dados.length - 1)) * w,
+    y: padV + h - ((v - min) / range) * h,
+    v,
+  }));
+
+  return (
+    <Svg width={largura} height={altura}>
+      {/* Linhas de grade */}
+      {[0, 0.25, 0.5, 0.75, 1].map((t) => (
+        <Line
+          key={t}
+          x1={padH} y1={padV + h * (1 - t)}
+          x2={padH + w} y2={padV + h * (1 - t)}
+          stroke="#1e293b" strokeWidth="1"
+        />
+      ))}
+      {}
+      <Polyline
+        points={pontos.join(' ')}
+        fill="none"
+        stroke={cor}
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      {}
+      {pontosArr.map((p, i) => (
+        <Circle key={i} cx={p.x} cy={p.y} r="4" fill={cor} />
+      ))}
+      {/* Labels min/max */}
+      <SvgText x={4} y={padV + 4} fontSize="10" fill="#64748b">{max.toFixed(0)}</SvgText>
+      <SvgText x={4} y={padV + h} fontSize="10" fill="#64748b">{min.toFixed(0)}</SvgText>
+    </Svg>
+  );
+}
+
 export default function SensoresScreen() {
   const { cores, limiares } = useMissao();
   const { dados, historico } = useDadosSensores(2500);
   const [sensorAtivo, setSensorAtivo] = useState('temperatura');
 
   const sensor = SENSORES.find((s) => s.key === sensorAtivo);
-  const dadosGrafico = historico[sensorAtivo]?.length > 1 ? historico[sensorAtivo] : [0, 0];
-  const labels = historico.labels?.length > 1 ? historico.labels : ['--', '--'];
+  const dadosGrafico = historico[sensorAtivo]?.length > 1 ? historico[sensorAtivo] : [0, 10];
 
   const s = estilos(cores);
 
   return (
     <View style={s.tela}>
-      <CabecalhoTela titulo="📡 Sensores" subtitulo="Leituras em tempo real" />
-
+      <CabecalhoTela titulo="📡 Sensores" subtitulo="Leituras em tempo real simulado" />
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
 
         {}
@@ -43,44 +95,16 @@ export default function SensoresScreen() {
               onPress={() => setSensorAtivo(sen.key)}
               activeOpacity={0.7}
             >
-              <Ionicons
-                name={sen.icone}
-                size={16}
-                color={sensorAtivo === sen.key ? '#fff' : cores.textoSecundario}
-              />
-              <Text style={[s.textoBotao, sensorAtivo === sen.key && { color: '#fff' }]}>
-                {sen.label}
-              </Text>
+              <Ionicons name={sen.icone} size={16} color={sensorAtivo === sen.key ? '#fff' : cores.textoSecundario} />
+              <Text style={[s.textoBotao, sensorAtivo === sen.key && { color: '#fff' }]}>{sen.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
         {}
         <View style={s.cardGrafico}>
-          <Text style={s.tituloGrafico}>
-            {sensor.label} ({sensor.unidade}) — últimos 10 pontos
-          </Text>
-          <LineChart
-            data={{
-              labels: labels.map((l, i) => (i % 3 === 0 ? l.slice(3) : '')), // só mostra algumas labels
-              datasets: [{ data: dadosGrafico }],
-            }}
-            width={LARGURA - 48}
-            height={180}
-            chartConfig={{
-              backgroundGradientFrom: cores.fundoCard,
-              backgroundGradientTo: cores.fundoCard,
-              decimalPlaces: 1,
-              color: () => cores.destaque,
-              labelColor: () => cores.textoSecundario,
-              propsForDots: { r: '4', strokeWidth: '2', stroke: cores.destaqueSecundario },
-              propsForBackgroundLines: { stroke: cores.borda },
-            }}
-            bezier
-            style={{ borderRadius: 8, marginTop: 8 }}
-            withInnerLines
-            withOuterLines={false}
-          />
+          <Text style={s.tituloGrafico}>{sensor.label} ({sensor.unidade}) — últimos 10 pontos</Text>
+          <GraficoLinha dados={dadosGrafico} cor={cores.destaque} largura={LARGURA - 48} />
           <Text style={s.valorAtual}>
             Valor atual:{' '}
             <Text style={{ color: cores.destaque, fontWeight: 'bold' }}>
@@ -89,7 +113,7 @@ export default function SensoresScreen() {
           </Text>
         </View>
 
-        {}
+        {/* Barras */}
         <Text style={s.secao}>Todos os Sensores</Text>
         <View style={s.cardBarras}>
           <BarraStatus label="Temperatura (°C)" valor={dados.temperatura} max={110} />
@@ -99,7 +123,7 @@ export default function SensoresScreen() {
           <BarraStatus label="Pressão interna (kPa)" valor={dados.pressao} max={120} />
         </View>
 
-        {}
+        {/* Limiares */}
         <Text style={s.secao}>Limiares Ativos</Text>
         <View style={s.cardLimiares}>
           {Object.entries(limiares).map(([sensor, val]) => (
@@ -121,73 +145,28 @@ const estilos = (cores) =>
   StyleSheet.create({
     tela: { flex: 1, backgroundColor: cores.fundo },
     scroll: { padding: 16 },
-    seletor: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 8,
-      marginBottom: 16,
-    },
+    seletor: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
     botaoSensor: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 5,
-      paddingHorizontal: 12,
-      paddingVertical: 7,
-      borderRadius: 20,
-      backgroundColor: cores.fundoCard,
-      borderWidth: 1,
-      borderColor: cores.borda,
+      flexDirection: 'row', alignItems: 'center', gap: 5,
+      paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20,
+      backgroundColor: cores.fundoCard, borderWidth: 1, borderColor: cores.borda,
     },
-    textoBotao: {
-      fontSize: 12,
-      color: cores.textoSecundario,
-      fontWeight: '600',
-    },
-    cardGrafico: {
-      backgroundColor: cores.fundoCard,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 16,
-    },
+    textoBotao: { fontSize: 12, color: cores.textoSecundario, fontWeight: '600' },
+    cardGrafico: { backgroundColor: cores.fundoCard, borderRadius: 12, padding: 16, marginBottom: 16 },
     tituloGrafico: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: cores.textoSecundario,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
+      fontSize: 13, fontWeight: '700', color: cores.textoSecundario,
+      textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8,
     },
-    valorAtual: {
-      fontSize: 13,
-      color: cores.textoSecundario,
-      marginTop: 10,
-      textAlign: 'right',
-    },
+    valorAtual: { fontSize: 13, color: cores.textoSecundario, marginTop: 10, textAlign: 'right' },
     secao: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: cores.textoSecundario,
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-      marginBottom: 10,
+      fontSize: 13, fontWeight: '700', color: cores.textoSecundario,
+      textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10,
     },
-    cardBarras: {
-      backgroundColor: cores.fundoCard,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 16,
-    },
-    cardLimiares: {
-      backgroundColor: cores.fundoCard,
-      borderRadius: 12,
-      padding: 16,
-    },
+    cardBarras: { backgroundColor: cores.fundoCard, borderRadius: 12, padding: 16, marginBottom: 16 },
+    cardLimiares: { backgroundColor: cores.fundoCard, borderRadius: 12, padding: 16 },
     linhaLimiar: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: 8,
-      borderBottomWidth: 1,
-      borderBottomColor: cores.borda,
+      flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+      paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: cores.borda,
     },
     labelLimiar: { flex: 1, color: cores.texto, fontSize: 14 },
     limiarAviso: { fontSize: 13, fontWeight: '600', marginRight: 16 },

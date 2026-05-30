@@ -3,7 +3,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMissao } from '../../context/MissaoContext';
 import BadgeAlerta from '../../components/BadgeAlerta';
 
-
 export default function TabsLayout() {
   const { cores } = useMissao();
 
@@ -24,7 +23,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="Monitoramento Pluto"
+        name="index"
         options={{
           title: 'Missão',
           tabBarIcon: ({ color, size }) => (
