@@ -22,27 +22,27 @@ O **Monitoramento Pluto* é a simulação de um aplicativo mobile desenvolvido e
 ## 📱 Telas do Aplicativo
 
 ### Home — Dashboard Principal
-![Home](./assets/screenshots/home.png)
+![Home] (./assets/screenshots/print_layout.png)
 Visão geral da missão ativa com indicadores de temperatura, energia, sinal e estabilidade orbital em tempo real simulado.
 
 ### Dashboard de Sensores
-![Sensores](./assets/screenshots/sensores.png)
+![Sensores](./assets/screenshots/print_sensores.png)
 Gráfico de linha histórico por sensor com seletor interativo e barras de status para todos os parâmetros monitorados.
 
 ### Dashboard de Energia
-![Energia](./assets/screenshots/energia.png)
+![Energia](./assets/screenshots/print-energia.png)
 Indicador circular de carga, gráfico de barras de consumo por subsistema e status individual dos painéis solares.
 
 ### Dashboard de Comunicação
-![Comunicação](./assets/screenshots/comunicacao.png)
+![Comunicação](./assets/screenshots/print-comunics.png)
 Status do link de telemetria, latência, largura de banda, taxa de erros e estado dos canais de comunicação.
 
 ### Alertas
-![Alertas](./assets/screenshots/alertas.png)
+![Alertas](./assets/screenshots/print-alertas.png)
 Lista de alertas ativos gerados automaticamente com nível de criticidade (crítico / atenção), horário e opção de descarte.
 
 ### Configurações / Formulário
-![Config](./assets/screenshots/configuracoes.png)
+![Config](./assets/screenshots/print-configs.png)
 Formulário de cadastro de missão com validação, configuração de limiares de alerta, alternância de tema e histórico de missões.
 
 ---
