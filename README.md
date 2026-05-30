@@ -22,7 +22,7 @@ O **Monitoramento Pluto* é a simulação de um aplicativo mobile desenvolvido e
 ## 📱 Telas do Aplicativo
 
 ### Home — Dashboard Principal
-![Home] (./assets/screenshots/print_layout.png)
+![Home](./assets/screenshots/print_layout.png)
 Visão geral da missão ativa com indicadores de temperatura, energia, sinal e estabilidade orbital em tempo real simulado.
 
 ### Dashboard de Sensores
